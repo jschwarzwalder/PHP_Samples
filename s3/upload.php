@@ -2,6 +2,21 @@
 
 require 'app/start.php';
 
+if(isset($_FILES['file'])) {
+    
+    $file = $_FILES['file'];
+    
+    //File details
+    
+    $name = $file['name'];
+    $temp_name = $file['tmp_name'];
+    
+    $extension = exlopde('.', $name);
+    
+
+    
+}
+
 ?>
 
 
@@ -12,7 +27,7 @@ require 'app/start.php';
         <title>Upload</title>
     </head>
     <body>
-        <form action ="" method="post" enctype="multipart/form-data">
+        <form action="upload.php" method="post" enctype="multipart/form-data">
             <input type="file" name="file"/>
             <input type="submit" value="Upload"/>
         </form>
