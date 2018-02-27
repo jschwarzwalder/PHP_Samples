@@ -1,0 +1,2 @@
+Sample file to upload from youtube tutorial on Amazon s3 with php
+https://www.youtube.com/watch?v=BR787aefMfY
