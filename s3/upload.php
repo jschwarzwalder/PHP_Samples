@@ -1,6 +1,8 @@
 <?php
 
+
 require 'app/start.php';
+use Aws\Exception\AwsException;
 
 if(isset($_FILES['file'])) {
     
@@ -12,8 +14,30 @@ if(isset($_FILES['file'])) {
     $temp_name = $file['tmp_name'];
     
     $extension = explode('.', $name);
-    
+	$extension = strtolower(end($extension));
+	// var_dump($extension);
+	
+	// Temp details
+	$key = md5(uniqid());
+	$temp_file_name = "{$key}.{$extension}";
+	$temp_file_path = "files/{$temp_file_name}";
+	// var_dump($temp_file_path);
+	
+	
+   //Move the file
+   move_uploaded_file($temp_name, $temp_file_path);
 
+
+
+try{
+    $result = $s3Client->putObject([
+        'Bucket'     => $config['s3']['bucket'],
+        'Key'        => "uploads/{$name}",
+        
+    ]);
+} catch (S3Exception $e) {
+    echo $e->getMessage() . "\n";
+}
     
 }
 
