@@ -11,7 +11,7 @@ if(isset($_FILES['file'])) {
     $name = $file['name'];
     $temp_name = $file['tmp_name'];
     
-    $extension = exlopde('.', $name);
+    $extension = explode('.', $name);
     
 
     
