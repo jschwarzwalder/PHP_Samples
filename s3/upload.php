@@ -33,6 +33,7 @@ try{
     $result = $s3Client->putObject([
         'Bucket'     => $config['s3']['bucket'],
         'Key'        => "uploads/{$name}",
+		'SourceFile' => $temp_file_path 
         
     ]);
 } catch (S3Exception $e) {
