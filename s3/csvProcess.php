@@ -1,4 +1,49 @@
 <?php
+
+$PHP1 = array('total_customers' => 0, 'total_requests' => 0 ); //PHP SDK V1
+$PHP2 = array('total_customers' => 0, 'total_requests' => 0 ); //PHP SDK V2
+$PHP3 = array('total_customers' => 0, 'total_requests' => 0 ); //PHP SDK V3
+$PHPSDK = array('total_customers' => 0, 'total_requests' => 0 ); //PHP SDK Total
+$SDK = array('total_customers' => 0, 'total_requests' => 0 ); //All SDKs
+
+function cal_percents(&$sdk) {
+	$total_customers = floatval($sdk['total_customers']);
+	$total_requests = $sdk['total_requests'];
+	foreach ($sdk as &$service){
+		if (is_array($service)){
+			$service['customer_percent'] = floatval($service['customers'] / $total_customers) * 100;
+			$service['requests_percent'] = ($service['requests'] / $total_requests )* 100;
+		}
+	}
+	unset($service);
+	
+}
+
+function cal_total_percents(&$sdk, $SDK) {
+	$total_customers = floatval($SDK['total_customers']);
+	$total_requests = $SDK['total_requests'];
+	foreach ($sdk as &$sdk_service){
+		if (is_array($sdk_service)){
+			$sdk_service['all_customer_percent'] = floatval($sdk_service['customers'] / $total_customers) * 100;
+			$sdk_service['all_requests_percent'] = ($sdk_service['requests'] / $total_requests )* 100;
+		}
+	}
+	unset($sdk_service);
+	
+}
+
+
+function add_to_array(&$sdk, $data){
+		$service['name'] = $data[1];	
+		$service['customers'] = intval($data[2]);
+		$service['requests'] = intval($data[3]);
+		array_push($sdk, $service);
+		$sdk['total_customers'] += $service['customers'];
+		$sdk['total_requests'] += $service['requests'];
+		
+}
+
+
 echo "<p>making bucket</p>";
 
 $new_bucket = "php-stats";
@@ -26,11 +71,6 @@ $config['s3']['bucket'] = $new_bucket;
 echo "<p>Reading file</p>";
 
 $myfile = fopen($temp_name, "r") or die("<p>Unable to open file!</p>");
-$PHP1 = array('total_customers' => 0, 'total_requests' => 0 ); //PHP SDK V1
-$PHP2 = array('total_customers' => 0, 'total_requests' => 0 ); //PHP SDK V2
-$PHP3 = array('total_customers' => 0, 'total_requests' => 0 ); //PHP SDK V3
-$PHPSDK = array('total_customers' => 0, 'total_requests' => 0 ); //PHP SDK Total
-$SDK = array('total_customers' => 0, 'total_requests' => 0 ); //All SDKs
 //echo fread($myfile,filesize($temp_name));
 
 // $data = fgetcsv($myfile, 0, ",");
@@ -46,34 +86,13 @@ while (($data = fgetcsv($myfile, 0, ",")) !== FALSE) {
 	$tool = $data[0];
 	//echo "<p>" . $tool . "</p>";
 	if ($tool == "PHP SDK V1"){
-		$service['name'] = $data[1];	
-		$service['customers'] = intval($data[2]);
-		$service['requests'] = intval($data[3]);
-		array_push($PHP1, $service);
-		$PHP1['total_customers'] += $service['customers'];
-		$PHP1['total_requests'] += $service['requests'];
-		//var_dump($PHP1);
+		add_to_array($PHP1, $data);
 	} else if ($tool == "PHP SDK V2") {
-		$service['name'] = $data[1];	
-		$service['customers'] = intval($data[2]);
-		$service['requests'] = intval($data[3]);
-		array_push($PHP2, $service);
-		$PHP2['total_customers'] += $service['customers'];
-		$PHP2['total_requests'] += $service['requests'];
+		add_to_array($PHP2, $data);
 	} else if ($tool == "PHP SDK V3") {
-		$service['name'] = $data[1];	
-		$service['customers'] = intval($data[2]);
-		$service['requests'] = intval($data[3]);
-		array_push($PHP3, $service);
-		$PHP3['total_customers'] += $service['customers'];
-		$PHP3['total_requests'] += $service['requests'];
+		add_to_array($PHP3, $data);
 	} else if ($tool == "PHP SDK Total") {
-		$service['name'] = $data[1];	
-		$service['customers'] = intval($data[2]);
-		$service['requests'] = intval($data[3]);
-		array_push($PHPSDK, $service);
-		$PHPSDK['total_customers'] += $service['customers'];
-		$PHPSDK['total_requests'] += $service['requests'];
+		add_to_array($PHPSDK, $data);		
 	} else if ($tool == "All SDKs") {
 		add_to_array($SDK, $data);
 		
@@ -82,33 +101,16 @@ while (($data = fgetcsv($myfile, 0, ",")) !== FALSE) {
 
 fclose($myfile);
 
-function cal_percents(&$sdk) {
-	$total_customers = floatval($sdk['total_customers']);
-	$total_requests = $sdk['total_requests'];
-	foreach ($sdk as &$service){
-		$service['customer_percent'] = floatval($service['customers'] / $total_customers);
-		$service['requests_percent'] = $service['requests'] / $total_requests;
-	}
-	
-}
-
-function add_to_array(&$sdk, $data){
-		$service['name'] = $data[1];	
-		$service['customers'] = intval($data[2]);
-		$service['requests'] = intval($data[3]);
-		array_push($sdk, $service);
-		$sdk['total_customers'] += $service['customers'];
-		$sdk['total_requests'] += $service['requests'];
-}
 
 
 cal_percents($SDK);
-
-//var_dump($PHP1);
-//var_dump($PHP2);
-//var_dump($PHP3);
-//var_dump($PHPSDK);
-var_dump($SDK);
-
+cal_percents($PHP1);
+cal_percents($PHP2);
+cal_percents($PHP3);
+cal_percents($PHPSDK);
+cal_total_percents($PHP1, $SDK);
+cal_total_percents($PHP2, $SDK);
+cal_total_percents($PHP3, $SDK);
+cal_total_percents($PHPSDK, $SDK);
 
 ?>
