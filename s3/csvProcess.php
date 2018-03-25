@@ -43,6 +43,26 @@ function add_to_array(&$sdk, $data){
 		
 }
 
+function compare_customers($a, $b) {
+	if (is_array($a) && is_array($b)){
+		$a_value = $a['customers'];
+		$b_value = $b['customers'];
+		return $b_value - $a_value;
+	} else {
+		return 0;
+	}
+}
+
+function compare_requests($a, $b) {
+	if (is_array($a) && is_array($b)){
+		$a_value = $a['requests'];
+		$b_value = $b['requests'];
+		return $b_value - $a_value;
+	} else {
+		return 0;
+	}
+}
+
 
 echo "<p>making bucket</p>";
 
@@ -112,5 +132,28 @@ cal_total_percents($PHP1, $SDK);
 cal_total_percents($PHP2, $SDK);
 cal_total_percents($PHP3, $SDK);
 cal_total_percents($PHPSDK, $SDK);
+
+
+echo "<p>Total Customers = " . $PHPSDK['total_customers'] . "</p>";
+echo "<p>Total Requests = ". $PHPSDK['total_requests'] .  "</p>";
+echo "<table>";
+echo "<tr>";
+echo "<th>Service</th>";
+echo "<th>Customers</th>";
+echo "<th>Requests</th>";
+echo "<th> Customers %</th>";
+echo "<th>Requests %</th>";
+echo "</tr>";
+usort($PHPSDK, "compare_customers");
+for ($i = 0; $i < 15; $i++){
+	echo "<tr>";
+	echo "<td>" . $PHPSDK[$i]['name'] . "</td>";
+	echo "<td>" . $PHPSDK[$i]['customers'] . "</td>";
+	echo "<td>" . $PHPSDK[$i]['requests'] . "</td>";
+	echo "<td>" . $PHPSDK[$i]['customer_percent'] . "</td>";
+	echo "<td>" . $PHPSDK[$i]['requests_percent'] . "</td>";
+	echo "</tr>";
+}
+echo "</table>";
 
 ?>
