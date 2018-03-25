@@ -36,7 +36,7 @@ function cal_total_percents(&$sdk, $SDK) {
 function add_to_array(&$sdk, $data){
 		$service['name'] = $data[1];	
 		$service['customers'] = intval($data[2]);
-		$service['requests'] = intval($data[3]);
+		$service['requests'] = floatval($data[3]);
 		array_push($sdk, $service);
 		$sdk['total_customers'] += $service['customers'];
 		$sdk['total_requests'] += $service['requests'];
@@ -48,6 +48,10 @@ function compare_customers($a, $b) {
 		$a_value = $a['customers'];
 		$b_value = $b['customers'];
 		return $b_value - $a_value;
+	} else  if (is_array($a)){
+		return -1;
+	} else if (is_array($b)) {
+		return 1;
 	} else {
 		return 0;
 	}
@@ -55,15 +59,56 @@ function compare_customers($a, $b) {
 
 function compare_requests($a, $b) {
 	if (is_array($a) && is_array($b)){
-		$a_value = $a['requests'];
-		$b_value = $b['requests'];
+		$a_value = $a['requests_percent'];
+		$b_value = $b['requests_percent'];
 		return $b_value - $a_value;
+	} else  if (is_array($a)){
+		return -1;
+	} else if (is_array($b)) {
+		return 1;
 	} else {
 		return 0;
 	}
 }
 
+function print_table($sdk, $top_num, $sortby){
+	echo "<h1>" .  "Ordered by " . $sortby . " </h1>";
+	echo "<p>Total Customers = " . number_format($sdk['total_customers']) . "</p>";
+	echo "<p>Total Requests = ". number_format($sdk['total_requests']) .  "</p>";
+	if ($sortby == 'customer') {
+		usort($sdk, "compare_customers");
+	} else if ($sortby == 'request') {
+		usort($sdk, "compare_requests");
+	} else {
+		echo "<h1>Sort by 'customer' or 'request'</h1>";
+		
+	}
+	echo "<table style=\"border : 1px solid black; text-align: right; border-spacing: 5px;\">";
+	echo "<tr>";
+	echo "<th>#</th>";
+	echo "<th>Service</th>";
+	echo "<th> Customers  </th>";
+	echo "<th>PHP %</th>";
+	echo "<th>Amazon %</th>";
+	echo "<th>Requests</th>";
+	echo "<th>PHP %</th>";
+	echo "<th>Amazon %</th>";
+	echo "</tr>";
 
+	for ($i = 0; $i <= $top_num; $i++){
+		echo "<tr>";
+		echo "<td>" . (intval($i) + 1 ). "</td>";
+		echo "<td>" . $sdk[$i]['name'] . "</td>";
+		echo "<td>" . number_format($sdk[$i]['customers']) . "</td>";
+		echo "<td>" . round($sdk[$i]['customer_percent'], 2) . "% </td>";
+		echo "<td>" . round($sdk[$i]['all_customer_percent'], 2) . "% </td>";
+		echo "<td>" . number_format($sdk[$i]['requests']) . "</td>";
+		echo "<td>" . round($sdk[$i]['requests_percent'], 2) . "% </td>";
+		echo "<td>" . round($sdk[$i]['all_requests_percent'], 2) . "% </td>";
+		echo "</tr>";
+	}
+	echo "</table>";
+}
 echo "<p>making bucket</p>";
 
 $new_bucket = "php-stats";
@@ -133,27 +178,20 @@ cal_total_percents($PHP2, $SDK);
 cal_total_percents($PHP3, $SDK);
 cal_total_percents($PHPSDK, $SDK);
 
+echo "<h1>All PHP</h1>";
+print_table($PHPSDK, 15 , 'customer');
+print_table($PHPSDK, 15 , 'request');
 
-echo "<p>Total Customers = " . $PHPSDK['total_customers'] . "</p>";
-echo "<p>Total Requests = ". $PHPSDK['total_requests'] .  "</p>";
-echo "<table>";
-echo "<tr>";
-echo "<th>Service</th>";
-echo "<th>Customers</th>";
-echo "<th>Requests</th>";
-echo "<th> Customers %</th>";
-echo "<th>Requests %</th>";
-echo "</tr>";
-usort($PHPSDK, "compare_customers");
-for ($i = 0; $i < 15; $i++){
-	echo "<tr>";
-	echo "<td>" . $PHPSDK[$i]['name'] . "</td>";
-	echo "<td>" . $PHPSDK[$i]['customers'] . "</td>";
-	echo "<td>" . $PHPSDK[$i]['requests'] . "</td>";
-	echo "<td>" . $PHPSDK[$i]['customer_percent'] . "</td>";
-	echo "<td>" . $PHPSDK[$i]['requests_percent'] . "</td>";
-	echo "</tr>";
-}
-echo "</table>";
+echo "<h1>PHP 3</h1>";
+print_table($PHP3, 15 , 'customer');
+print_table($PHP3, 15 , 'request');
+
+echo "<h1>PHP 2</h1>";
+print_table($PHP2, 15 , 'customer');
+print_table($PHP2, 15 , 'request');
+
+echo "<h1>PHP 1</h1>";
+print_table($PHP1, 15 , 'customer');
+print_table($PHP1, 15 , 'request');
 
 ?>
